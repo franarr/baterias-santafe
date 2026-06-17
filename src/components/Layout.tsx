@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Menu, X, Search, BatteryCharging, Wrench, Home, Phone, Instagram, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '#', label: 'INICIO' },
-    { href: '#buscador', label: '¿QUÉ BATERÍA?' },
-    { href: '#productos', label: 'PRODUCTOS' },
-    { href: '#servicios', label: 'SERVICIOS' },
-    { href: '#contacto', label: 'CONTACTO' },
+    { href: '/', label: 'INICIO', isRoute: true },
+    { href: '/#buscador', label: '¿QUÉ BATERÍA?', isRoute: false },
+    { href: '/productos', label: 'PRODUCTOS', isRoute: true },
+    { href: '/#servicios', label: 'SERVICIOS', isRoute: false },
+    { href: '/#contacto', label: 'CONTACTO', isRoute: false },
   ];
 
   return (
@@ -20,7 +21,7 @@ export function Header() {
         <div className="flex items-center justify-between px-4 h-16 md:h-20 w-full max-w-[1280px] mx-auto">
 
           {/* Logo */}
-          <a className="flex items-center" href="#" aria-label="Inicio - Baterías Santa Fe">
+          <Link className="flex items-center" to="/" aria-label="Inicio - Baterías Santa Fe">
             <img
               alt="Baterías Santa Fe Logo"
               className="h-14 md:h-20 w-auto object-contain"
@@ -28,14 +29,20 @@ export function Header() {
               src="/image/logo.svg"
               loading="eager"
             />
-          </a>
+          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8" aria-label="Navegación principal">
             {navLinks.map(link => (
-              <a key={link.href} className="text-white/60 font-label text-sm tracking-widest hover:text-white transition-colors duration-200 py-2" href={link.href}>
-                {link.label}
-              </a>
+              link.isRoute ? (
+                <Link key={link.href} className="text-white/60 font-label text-sm tracking-widest hover:text-white transition-colors duration-200 py-2" to={link.href}>
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={link.href} className="text-white/60 font-label text-sm tracking-widest hover:text-white transition-colors duration-200 py-2" href={link.href}>
+                  {link.label}
+                </a>
+              )
             ))}
           </nav>
 
@@ -90,14 +97,25 @@ export function Header() {
             >
               <nav className="flex flex-col px-6 py-4 gap-0" aria-label="Menú móvil">
                 {navLinks.map(link => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="font-label tracking-widest text-base text-white/60 hover:text-white py-4 border-b border-white/5 last:border-0 transition-colors"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {link.label}
-                  </a>
+                  link.isRoute ? (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className="font-label tracking-widest text-base text-white/60 hover:text-white py-4 border-b border-white/5 last:border-0 transition-colors"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="font-label tracking-widest text-base text-white/60 hover:text-white py-4 border-b border-white/5 last:border-0 transition-colors"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  )
                 ))}
                 <a
                   href="https://wa.me/5493425190098"
@@ -124,14 +142,14 @@ export function MobileNav() {
       className="md:hidden fixed bottom-0 left-0 right-0 flex justify-around items-center py-2 px-2 bg-[#0a0d14]/98 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.6)] z-30"
       aria-label="Navegación mobile"
     >
-      <a className="flex flex-col items-center gap-1 px-4 py-2 text-[#60A5FA]" href="#">
+      <Link className="flex flex-col items-center gap-1 px-4 py-2 text-[#60A5FA]" to="/">
         <Home size={20} strokeWidth={2} />
         <span className="font-label text-[9px] tracking-widest">INICIO</span>
-      </a>
-      <a className="flex flex-col items-center gap-1 px-4 py-2 text-white/40 hover:text-white transition-colors" href="#productos">
+      </Link>
+      <Link className="flex flex-col items-center gap-1 px-4 py-2 text-white/40 hover:text-white transition-colors" to="/productos">
         <BatteryCharging size={20} strokeWidth={2} />
         <span className="font-label text-[9px] tracking-widest">BATERÍAS</span>
-      </a>
+      </Link>
       <a className="flex flex-col items-center gap-1 px-4 py-2 text-white/40 hover:text-white transition-colors" href="#servicios">
         <Wrench size={20} strokeWidth={2} />
         <span className="font-label text-[9px] tracking-widest">SERVICIOS</span>

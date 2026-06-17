@@ -1,5 +1,6 @@
 import { Zap, ShieldCheck, Car, Bike, Power } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 
 export function Products() {
   const products = [
@@ -78,14 +79,12 @@ export function Products() {
             <h2 className="font-display text-4xl md:text-5xl text-on-surface tracking-wide">PRODUCTOS DESTACADOS</h2>
             <p className="text-on-surface-variant mt-2 font-body text-base">Autos, Camionetas, Motos y Tecnología Start-Stop.</p>
           </div>
-          <a 
-            href="https://wa.me/5493425190098"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link 
+            to="/productos"
             className="text-primary hover:text-primary-fixed transition-colors font-label tracking-widest flex items-center gap-2 border-b border-primary pb-1"
           >
-            VER TODOS LOS MODELOS
-          </a>
+            VER TODO EL CATÁLOGO
+          </Link>
         </motion.div>
 
         <div className="relative group flex overflow-hidden -mx-5 px-5 py-4">
