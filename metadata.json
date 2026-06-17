@@ -1,0 +1,6 @@
+{
+  "name": "Baterias Santa Fe App",
+  "description": "Catálogo y landing page para venta y colocación de baterías.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
