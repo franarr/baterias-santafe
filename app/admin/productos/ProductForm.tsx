@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/lib/db/schema';
+import { ImageUpload } from '@/components/ImageUpload';
 
 const CATEGORIES = [
   { value: 'auto', label: 'Autos' },
@@ -175,9 +176,9 @@ export function ProductForm({ product }: { product?: Product }) {
             <label className={labelClass}>Tag / Etiqueta</label>
             <input value={form.tag} onChange={(e) => set('tag', e.target.value)} className={inputClass} placeholder="Instalación Incluida" />
           </div>
-          <div>
-            <label className={labelClass}>URL de imagen</label>
-            <input value={form.image} onChange={(e) => set('image', e.target.value)} className={inputClass} placeholder="https://..." />
+          <div className="sm:col-span-2">
+            <label className={labelClass}>Imagen del producto</label>
+            <ImageUpload value={form.image} onChange={(url) => set('image', url)} />
           </div>
         </div>
       </div>
