@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+.next/
+dev.db
+dev.db-shm
+dev.db-wal
+drizzle/
