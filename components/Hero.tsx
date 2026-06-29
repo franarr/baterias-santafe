@@ -10,7 +10,11 @@ export function Hero() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-container/20 via-surface to-surface"></div>
         <div
           className="w-full h-full object-cover opacity-[0.15] mix-blend-overlay"
-          style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_9tY7KlpLwNfAaFaKCJjKFb49JnX_22Rlx5O1yuZnRuLuE_IESJ0HmO81DrZMdf5vE2FC_IIgidNZsB8ml8RTSw7Bm1ZDg3fnMfDwUSC1t1vxM0yhSbqj6-7lo5gllYY4MUFtg9yVAM6bNU8AvvIPH5M5W9wChEVwuLKwZxspvycRszP0I5dKe3OSW3lnvuuGMsqS4MDDs00p5EOQn9ZYkJo51JSE3uVaqn2J0o-L5N4udRKSAO88yfxMKyHDaxK70hVLTpmW6gtn')" }}
+          style={{
+            backgroundImage: "url('/image/hero.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
         />
       </div>
 
@@ -59,6 +63,22 @@ export function Hero() {
             </a>
           </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="flex-1 w-full max-w-lg lg:max-w-none relative"
+        >
+          <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full transform scale-75 z-0"></div>
+
+          <img
+            alt="Batería Automotor Pioneiro - Entrega e instalación en Santa Fe"
+            className="w-full h-auto drop-shadow-[0_30px_40px_rgba(0,0,0,0.4)] hover:scale-[1.02] transition-transform duration-500 relative z-10"
+            loading="lazy"
+            src="/image/hero.png"
+          />
+        </motion.div>
       </motion.div>
     </section>
   );
