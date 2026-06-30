@@ -1,15 +1,24 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { BatteryCharging, LayoutDashboard, Package, LogOut, ExternalLink } from 'lucide-react';
+import { AdminUIProvider } from '@/components/admin/AdminUI';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
+
+  // The login page is full-screen and must not render the authenticated chrome.
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
 
   async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/admin/login');
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      // Hard navigation so the cleared cookie takes effect immediately.
+      window.location.assign('/admin/login');
+    }
   }
 
   const navItems = [
@@ -18,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
+    <AdminUIProvider>
     <div className="min-h-screen bg-[#0a0d14] flex">
       {/* Sidebar */}
       <aside className="w-56 bg-[#0d1117] border-r border-white/5 flex flex-col fixed inset-y-0 left-0 z-20">
@@ -78,5 +88,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {children}
       </main>
     </div>
+    </AdminUIProvider>
   );
 }

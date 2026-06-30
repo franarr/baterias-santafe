@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { Search, Zap, ShieldCheck, ChevronRight } from 'lucide-react';
@@ -17,6 +17,16 @@ const categories = [
 export function CatalogView({ products }: { products: ParsedProduct[] }) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Lee filtros desde la URL al montar (?cat=auto, ?q=corolla) para que
+  // funcionen los enlaces externos y el buscador del header.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('cat');
+    const q = params.get('q');
+    if (cat && categories.some((c) => c.value === cat)) setActiveCategory(cat);
+    if (q) setSearchQuery(q);
+  }, []);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {

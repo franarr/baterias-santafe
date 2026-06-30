@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { products } from '@/lib/db/schema';
 import { eq, asc } from 'drizzle-orm';
-import { verifyToken, COOKIE_NAME } from '@/lib/auth';
+import { verifyToken, COOKIE_NAME } from '@/lib/jwt';
+import { sanitizeProductInput } from '@/lib/products';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 async function isAuth(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
@@ -13,6 +17,11 @@ async function isAuth(request: NextRequest) {
   } catch {
     return false;
   }
+}
+
+function isUniqueError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /unique|constraint/i.test(msg);
 }
 
 export async function GET(request: NextRequest) {
@@ -31,16 +40,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
+  }
 
-  const [created] = await db
-    .insert(products)
-    .values({
-      ...body,
-      vehicles: JSON.stringify(body.vehicles || []),
-      features: JSON.stringify(body.features || []),
-    })
-    .returning();
+  const result = sanitizeProductInput(body);
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  }
 
-  return NextResponse.json(created, { status: 201 });
+  try {
+    const [created] = await db.insert(products).values(result.data).returning();
+    return NextResponse.json(created, { status: 201 });
+  } catch (err) {
+    if (isUniqueError(err)) {
+      return NextResponse.json(
+        { error: `Ya existe un producto con el slug "${result.data.slug}". Cambiá el slug.` },
+        { status: 409 }
+      );
+    }
+    console.error('POST /api/products', err);
+    return NextResponse.json({ error: 'No se pudo crear el producto' }, { status: 500 });
+  }
 }

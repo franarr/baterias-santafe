@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, Eye, EyeOff, Loader2, ImageOff } from 'lucide-react';
 import type { Product } from '@/lib/db/schema';
+import { useAdminUI } from '@/components/admin/AdminUI';
 
 const categoryColors: Record<string, string> = {
   auto: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -14,14 +15,48 @@ const categoryColors: Record<string, string> = {
 
 export function ProductsTable({ products }: { products: Product[] }) {
   const router = useRouter();
+  const { toast, confirm } = useAdminUI();
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [toggling, setToggling] = useState<number | null>(null);
 
-  async function handleDelete(id: number) {
-    if (!confirm('¿Eliminar este producto?')) return;
-    setDeleting(id);
-    await fetch(`/api/products/${id}`, { method: 'DELETE' });
-    router.refresh();
-    setDeleting(null);
+  async function handleDelete(p: Product) {
+    const ok = await confirm({
+      title: 'Eliminar producto',
+      message: `Se eliminará "${p.model}" de forma permanente. Esta acción no se puede deshacer.`,
+      confirmLabel: 'ELIMINAR',
+      danger: true,
+    });
+    if (!ok) return;
+
+    setDeleting(p.id);
+    try {
+      const res = await fetch(`/api/products/${p.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      toast(`"${p.model}" eliminado`, 'success');
+      router.refresh();
+    } catch {
+      toast('No se pudo eliminar el producto', 'error');
+    } finally {
+      setDeleting(null);
+    }
+  }
+
+  async function togglePublished(p: Product) {
+    setToggling(p.id);
+    try {
+      const res = await fetch(`/api/products/${p.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: !p.published }),
+      });
+      if (!res.ok) throw new Error();
+      toast(!p.published ? `"${p.model}" publicado` : `"${p.model}" pasó a borrador`, 'success');
+      router.refresh();
+    } catch {
+      toast('No se pudo cambiar el estado', 'error');
+    } finally {
+      setToggling(null);
+    }
   }
 
   if (products.length === 0) {
@@ -48,8 +83,20 @@ export function ProductsTable({ products }: { products: Product[] }) {
           {products.map((p) => (
             <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
               <td className="px-5 py-4">
-                <p className="font-body text-sm text-white font-medium">{p.model}</p>
-                <p className="font-body text-xs text-white/30 mt-0.5 hidden sm:block">{p.slug}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-lg bg-[#0a0d14] border border-white/5 flex items-center justify-center overflow-hidden shrink-0">
+                    {p.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.image} alt={p.model} className="w-full h-full object-contain" />
+                    ) : (
+                      <ImageOff size={16} className="text-white/20" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-body text-sm text-white font-medium truncate">{p.model}</p>
+                    <p className="font-body text-xs text-white/30 mt-0.5 hidden sm:block truncate">{p.slug}</p>
+                  </div>
+                </div>
               </td>
               <td className="px-5 py-4 hidden md:table-cell">
                 <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-label tracking-widest border ${categoryColors[p.category] || 'bg-white/5 text-white/40 border-white/10'}`}>
@@ -60,17 +107,25 @@ export function ProductsTable({ products }: { products: Product[] }) {
                 <span className="font-body text-sm text-white">{p.price}</span>
               </td>
               <td className="px-5 py-4">
-                {p.published ? (
-                  <span className="flex items-center gap-1.5 text-xs font-body text-green-400">
+                <button
+                  onClick={() => togglePublished(p)}
+                  disabled={toggling === p.id}
+                  title={p.published ? 'Click para pasar a borrador' : 'Click para publicar'}
+                  className={`flex items-center gap-1.5 text-xs font-body rounded-full px-2.5 py-1 transition-colors disabled:opacity-50 ${
+                    p.published
+                      ? 'text-green-400 hover:bg-green-400/10'
+                      : 'text-white/40 hover:bg-white/5'
+                  }`}
+                >
+                  {toggling === p.id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : p.published ? (
                     <Eye size={12} />
-                    Publicado
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-xs font-body text-white/30">
+                  ) : (
                     <EyeOff size={12} />
-                    Borrador
-                  </span>
-                )}
+                  )}
+                  {p.published ? 'Publicado' : 'Borrador'}
+                </button>
               </td>
               <td className="px-5 py-4">
                 <div className="flex items-center justify-end gap-2">
@@ -82,12 +137,12 @@ export function ProductsTable({ products }: { products: Product[] }) {
                     <Pencil size={15} />
                   </Link>
                   <button
-                    onClick={() => handleDelete(p.id)}
+                    onClick={() => handleDelete(p)}
                     disabled={deleting === p.id}
                     className="p-2 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-400/5 transition-all disabled:opacity-50"
                     title="Eliminar"
                   >
-                    <Trash2 size={15} />
+                    {deleting === p.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                   </button>
                 </div>
               </td>

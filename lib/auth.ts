@@ -1,22 +1,7 @@
-import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { COOKIE_NAME, signToken, verifyToken } from '@/lib/jwt';
 
-const COOKIE_NAME = 'auth_token';
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'dev-secret-change-in-production'
-);
-
-export async function signToken(payload: { username: string }) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('24h')
-    .sign(SECRET);
-}
-
-export async function verifyToken(token: string) {
-  const { payload } = await jwtVerify(token, SECRET);
-  return payload;
-}
+export { COOKIE_NAME, signToken, verifyToken };
 
 export async function getAuthToken(): Promise<string | undefined> {
   const cookieStore = await cookies();
@@ -33,5 +18,3 @@ export async function isAuthenticated(): Promise<boolean> {
     return false;
   }
 }
-
-export { COOKIE_NAME };

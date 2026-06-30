@@ -1,10 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { BatteryCharging } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,14 +21,18 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.push('/admin');
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Error al iniciar sesión');
+        // Hard navigation so the browser sends the freshly-set auth cookie on
+        // the next request and the middleware sees it (avoids a redirect loop
+        // back to /admin/login on Vercel). Keep `loading` true through unload.
+        window.location.assign('/admin');
+        return;
       }
+
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || 'Error al iniciar sesión');
+      setLoading(false);
     } catch {
       setError('Error de conexión');
-    } finally {
       setLoading(false);
     }
   }

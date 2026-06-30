@@ -1,12 +1,28 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Menu, X, Search, BatteryCharging, Wrench, Home, Phone, Instagram, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    router.push(q ? `/productos?q=${encodeURIComponent(q)}` : '/productos');
+    setSearchOpen(false);
+  };
 
   const navLinks = [
     { href: '/', label: 'INICIO', isRoute: true },
@@ -46,9 +62,39 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <button className="text-white/60 hover:text-white transition-colors" aria-label="Buscar">
-              <Search size={20} />
-            </button>
+            <AnimatePresence mode="wait">
+              {searchOpen ? (
+                <motion.form
+                  key="search-input"
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 240 }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  onSubmit={handleSearch}
+                  className="relative overflow-hidden"
+                >
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onBlur={() => !searchQuery && setSearchOpen(false)}
+                    placeholder="Buscar batería..."
+                    className="w-full pl-9 pr-3 py-2 bg-[#111827] border border-white/10 rounded-full text-white font-body text-sm placeholder:text-white/30 focus:outline-none focus:border-[#1E40AF]/50 focus:ring-1 focus:ring-[#1E40AF]/30 transition-all"
+                  />
+                </motion.form>
+              ) : (
+                <button
+                  key="search-button"
+                  onClick={() => setSearchOpen(true)}
+                  className="text-white/60 hover:text-white transition-colors"
+                  aria-label="Buscar"
+                >
+                  <Search size={20} />
+                </button>
+              )}
+            </AnimatePresence>
             <a
               className="flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-full font-label text-sm tracking-widest hover:bg-[#128C7E] transition-colors shadow-[0_0_15px_rgba(37,211,102,0.4)]"
               href="https://wa.me/5493425190098"

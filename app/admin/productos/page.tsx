@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { ProductsTable } from './ProductsTable';
 
+export const dynamic = 'force-dynamic';
+
 async function getAllProducts() {
   try {
     return await db.select().from(products).orderBy(asc(products.id));

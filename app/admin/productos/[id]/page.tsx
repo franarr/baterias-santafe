@@ -4,6 +4,8 @@ import { products } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { ProductForm } from '../ProductForm';
 
+export const dynamic = 'force-dynamic';
+
 async function getProduct(id: number) {
   try {
     const [p] = await db.select().from(products).where(eq(products.id, id));

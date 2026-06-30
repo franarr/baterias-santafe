@@ -4,6 +4,8 @@ import { eq, count } from 'drizzle-orm';
 import Link from 'next/link';
 import { Package, Eye, Plus } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   try {
     const [{ total }] = await db.select({ total: count() }).from(products);
